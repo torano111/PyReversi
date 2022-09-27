@@ -1,2 +1,5 @@
 # PyReversi
-Simple Reversi made with Python & pygame.
+Simple Reversi game made with Python & Pygame.
+
+# How to run
+`python reversi.py`

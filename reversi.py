@@ -7,30 +7,13 @@ from reversiBoard import ReversiBoardInfo, ReversiBoard
 from reversiGrid import ReversiGrid, StoneType
 from player import Player
 import reversiGridsList
-
-# Game in general
-FRAME_RATE = 60
-DISPLAY_X = 600
-DISPLAY_Y = 600
-
-# Board
-BOARD_START_POS = Vector2(10, 10)
-BOARD_COLOR = pygame.Color(220, 220, 220)
-INITIAL_GRIDS = reversiGridsList.reversiGrids
-# INITIAL_GRIDS = reversiGridsList.testFlipGrids1
-# INITIAL_GRIDS = reversiGridsList.testFlipGrids2
-
-# Grids
-GRID_SIZE_X = 8
-GRID_SIZE_Y = 8
-GRID_WIDTH = float(50)
-GRID_COLOR = pygame.Color(0, 0, 0)
+import settings
 
 # does initialization and operates game tick.
 def main():
     pygame.init()
     
-    main_surface = pygame.display.set_mode((DISPLAY_X, DISPLAY_Y))
+    screen = pygame.display.set_mode(settings.SCREENRECT.size)
     pygame.display.set_caption("Reversi")
     clock = pygame.time.Clock()
     
@@ -40,14 +23,19 @@ def main():
     player0 = Player(StoneType.BlackStone)
     player1 = Player(StoneType.WhiteStone)
 
-    boardInfo = ReversiBoardInfo(BOARD_START_POS, GRID_SIZE_X, GRID_SIZE_Y, GRID_WIDTH, GRID_COLOR, BOARD_COLOR)
-    board = ReversiBoard(main_surface, boardInfo)
+    boardInfo = ReversiBoardInfo(settings.BOARD_START_POS, settings.GRID_SIZE_X, settings.GRID_SIZE_Y, settings.GRID_WIDTH, settings.GRID_COLOR, settings.BOARD_COLOR)
+    board = ReversiBoard(screen, boardInfo)
     gm = GameManager(board, player0, player1)
-    gm.StartGame(0, INITIAL_GRIDS)
+    gm.StartGame(0, settings.INITIAL_GRIDS)
+
+    # background = pygame.Surface((300, 300))
+    # background.convert()
+    # background.fill((0, 255, 0))
 
     while gm.getGameState() != GameState.EndingGame: 
-        clock.tick(FRAME_RATE)
+        clock.tick(settings.FRAME_RATE)
         gm.update()
+        # screen.blit(background, (0, 0))
         pygame.display.update()
         
     pygame.quit()
