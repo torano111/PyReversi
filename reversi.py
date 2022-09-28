@@ -17,25 +17,21 @@ def main():
     pygame.display.set_caption("Reversi")
     clock = pygame.time.Clock()
     
-    # # pygame.mouse.set_visible(False)
-    # # pygame.event.set_grab(True)
-    
     player0 = Player(StoneType.BlackStone)
     player1 = Player(StoneType.WhiteStone)
 
-    boardInfo = ReversiBoardInfo(settings.BOARD_START_POS, settings.GRID_SIZE_X, settings.GRID_SIZE_Y, settings.GRID_WIDTH, settings.GRID_COLOR, settings.BOARD_COLOR)
-    board = ReversiBoard(screen, boardInfo)
-    gm = GameManager(board, player0, player1)
-    gm.StartGame(0, settings.INITIAL_GRIDS)
+    boardSizeOffset = 1 # offset for grids
+    boardSurface = pygame.Surface((settings.GRID_WIDTH * settings.GRID_SIZE_X + boardSizeOffset, settings.GRID_WIDTH * settings.GRID_SIZE_Y + boardSizeOffset))
+    boardSurface.convert()
 
-    # background = pygame.Surface((300, 300))
-    # background.convert()
-    # background.fill((0, 255, 0))
+    boardInfo = ReversiBoardInfo(Vector2(), settings.GRID_SIZE_X, settings.GRID_SIZE_Y, settings.GRID_WIDTH, settings.GRID_COLOR, settings.BOARD_COLOR)
+    board = ReversiBoard(boardSurface, boardInfo)
+    gm = GameManager(screen, board, player0, player1, settings.BOARD_START_POS)
+    gm.StartGame(0, settings.INITIAL_GRIDS)
 
     while gm.getGameState() != GameState.EndingGame: 
         clock.tick(settings.FRAME_RATE)
         gm.update()
-        # screen.blit(background, (0, 0))
         pygame.display.update()
         
     pygame.quit()

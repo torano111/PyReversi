@@ -5,6 +5,7 @@ import pygame
 from pygame.math import Vector2
 from reversiGrid import ReversiGrid, StoneType
 import reversiUtility
+from pygame import Surface
 
 DEBUG_KEY = pygame.K_F1
 DEBUG_NO_TURN_CHANGE = False
@@ -21,11 +22,13 @@ class GameState(IntEnum):
 
 # Handles Reversi game logic
 class GameManager:
-    def __init__(self, board: ReversiBoard, firstPlayer: Player, secondPlayer: Player):
+    def __init__(self, surface: Surface, board: ReversiBoard, firstPlayer: Player, secondPlayer: Player, boardOffset: Vector2):
+        self.mainSurface = surface
         self.board = board
         self.__players = [firstPlayer, secondPlayer]
         self.__gameState = GameState.Initializing
         self.__curPlayerIdx = 0 
+        self.boardOffset = boardOffset
 
     def getPlayer(self, index: int):
         return self.__players[index]
@@ -88,6 +91,8 @@ class GameManager:
                     # todo comment out this and do animation.
                     self.__gameState = GameState.WaitingForPlayer
 
+        self.mainSurface.fill((220, 220, 220))
+        self.mainSurface.blit(self.board.surface, self.boardOffset)
         self.board.update()
 
     def handlePlayerAction(self, action: PlayerActionType):
@@ -95,8 +100,8 @@ class GameManager:
 
         if action == PlayerActionType.PutStone:
             mousePos = pygame.mouse.get_pos()
-            if self.board.isOverReversiBoard(Vector2(mousePos)):
-                    mouseIndexX, mouseIndexY = self.board.getGridIndex(Vector2(mousePos))
+            if self.board.isOverReversiBoard(Vector2(mousePos) - self.boardOffset):
+                    mouseIndexX, mouseIndexY = self.board.getGridIndex(Vector2(mousePos) - self.boardOffset)
                     lastGrid = self.board.getGrid(mouseIndexX, mouseIndexY)
                     newGrid = ReversiGrid(False, player.stoneType)
                     

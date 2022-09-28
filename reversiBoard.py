@@ -128,7 +128,7 @@ class ReversiBoard:
 
     def getPositionFromGridIndex(self, indexX: int, indexY: int):
         return (self.boardInfo.boardOffset.x + self.boardInfo.gridWidth * indexX + self.boardInfo.gridWidth / 2
-                    , self.boardInfo.boardOffset.y + self.boardInfo.gridWidth * indexY + self.boardInfo.gridWidth / 2)
+                   , self.boardInfo.boardOffset.y + self.boardInfo.gridWidth * indexY + self.boardInfo.gridWidth / 2)
 
     # should be called every frame
     def update(self):
@@ -150,7 +150,7 @@ class ReversiBoard:
             numGrids_opposite = self.boardInfo.gridSizeY if axis == 0 else self.boardInfo.gridSizeX
             numLoop = numGrids_current + 1
             oppositeAxis = 1 if axis == 0 else 0
-        
+
             startValue_opposite = self.boardInfo.boardOffset[oppositeAxis]
             endValue_opposite = startValue_opposite + self.boardInfo.gridWidth * numGrids_opposite
         

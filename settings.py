@@ -8,7 +8,8 @@ SCREENRECT = pygame.Rect(0, 0, 600, 600)
 
 # Board
 BOARD_START_POS = pygame.Vector2(10, 10)
-BOARD_COLOR = pygame.Color(220, 220, 220)
+# BOARD_COLOR = pygame.Color(220, 220, 220)
+BOARD_COLOR = pygame.Color(0, 255, 0)
 INITIAL_GRIDS = reversiGridsList.reversiGrids
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids1
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids2
