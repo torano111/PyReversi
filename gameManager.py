@@ -3,9 +3,10 @@ from enum import IntEnum
 from player import Player
 import pygame
 from pygame.math import Vector2
-from reversiGrid import ReversiGrid, StoneType
-import reversiUtility
+from reversiGrid import ReversiGrid
 from pygame import Surface
+
+from reversiStoneType import StoneType
 
 DEBUG_KEY = pygame.K_F1
 DEBUG_NO_TURN_CHANGE = False
@@ -29,6 +30,8 @@ class GameManager:
         self.__gameState = GameState.Initializing
         self.__curPlayerIdx = 0 
         self.boardOffset = boardOffset
+        self.flippingStoneInfos = []
+        self.flipStoneType = StoneType.BlackStone
 
     def getPlayer(self, index: int):
         return self.__players[index]
@@ -64,7 +67,7 @@ class GameManager:
             if isValidArray:
                 for x in range(0, sizeX):
                     for y in range(0, sizeY):
-                        grid = reversiUtility.convertIntToGrid(initialGrids[x][y])
+                        grid = ReversiGrid.ToGrid(initialGrids[x][y])
                         self.board.setGrid(x, y, grid, False)
 
             self.__gameState = GameState.WaitingForPlayer
@@ -85,15 +88,18 @@ class GameManager:
             # check player input
             elif self.__gameState == GameState.WaitingForPlayer:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # left mouse button
-                    self.__gameState = GameState.WaitingForGame
+                    # self.__gameState = GameState.WaitingForGame
                     self.handlePlayerAction(PlayerActionType.PutStone)
 
                     # todo comment out this and do animation.
-                    self.__gameState = GameState.WaitingForPlayer
+                    # self.__gameState = GameState.WaitingForPlayer
+        
+        if self.__gameState == GameState.WaitingForGame:
+            self.handleFlipAnimation()
 
         self.mainSurface.fill((220, 220, 220))
-        self.mainSurface.blit(self.board.surface, self.boardOffset)
         self.board.update()
+        self.mainSurface.blit(self.board.surface, self.boardOffset)
 
     def handlePlayerAction(self, action: PlayerActionType):
         player = self.getCurrentPlayer()
@@ -111,16 +117,48 @@ class GameManager:
                             print("Couldn't put stone at (%d, %d) because no stone can be flipped.")
                             return
                         
-                        self.board.setGrid(mouseIndexX, mouseIndexY, newGrid, True)
+                        # place a stone
+                        self.board.setGrid(mouseIndexX, mouseIndexY, newGrid, False)
+                        self.flipStoneType = newGrid.stoneType
+                        self.flippingStoneInfos.clear()
+                        # self.flippingStoneInfos.append((mouseIndexX, mouseIndexY))
                         print("Player %d put a stone(%s) at (%d, %d)" % (self.__curPlayerIdx, newGrid.stoneType, mouseIndexX, mouseIndexY))
 
-                        # flip
+                        # flip stones
                         print("flipInfo " + str(flipInfo))
                         for endIdx in range(0, flipInfo.getNumEndPoints()):
                             innerPoints = flipInfo.getInnerPoints(endIdx)
                             for inrPts in innerPoints:
-                                self.board.setGrid(inrPts[0], inrPts[1], newGrid, True)
+                                if self.board.containGrid(inrPts[0], inrPts[1]):
+                                    # gridToFlip = ReversiGrid(False, player.stoneType)
+                                    # self.board.setGrid(inrPts[0], inrPts[1], gridToFlip, True)
+                                    self.flippingStoneInfos.append(inrPts)
 
                         # todo check if the other player can put a stone before changing the turn. if not, skip his turn.
-                        if not DEBUG_NO_TURN_CHANGE: self.__changePlayerTurn()
+                        # if not DEBUG_NO_TURN_CHANGE: self.__changePlayerTurn()
                         print("") # space
+                        self.__gameState = GameState.WaitingForGame
+
+    def handleFlipAnimation(self):
+        if len(self.flippingStoneInfos) > 0:
+            flipInfo = self.flippingStoneInfos[0]
+            if self.board.containGrid(flipInfo[0], flipInfo[1]):
+                    flippingSprite = self.board.getSprite(flipInfo[0], flipInfo[1])
+                    if not flippingSprite.isAnimating():
+                        if flippingSprite.stoneType == self.flipStoneType:
+                            # done animating
+                            self.flippingStoneInfos.pop(0)
+                        else:
+                            # start animating
+                            gridToFlip = ReversiGrid(False, self.flipStoneType)
+                            self.board.setGrid(flipInfo[0], flipInfo[1], gridToFlip, True)
+            else:
+                print("error: reversi board doesn't contain (%d, %d)" % (flipInfo[0], flipInfo[1]))
+
+        # change the player turn
+        if len(self.flippingStoneInfos) == 0:
+            self.__gameState = GameState.WaitingForPlayer
+
+            if DEBUG_NO_TURN_CHANGE: return
+            
+            self.__changePlayerTurn()

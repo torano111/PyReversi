@@ -4,8 +4,10 @@ from pygame.math import Vector2
 from pygame.surface import Surface
 from pygame.color import Color
 import math
-from reversiGrid import ReversiGrid, StoneType
-import reversiUtility
+from reversiGrid import ReversiGrid
+from reversiStoneType import StoneType
+from pygame.sprite import RenderUpdates
+from reversiSprites import FlippingReversiStone
 
 class ReversiBoardInfo:
     def __init__(self, boardOffset: Vector2, numGridX: int, numGridY: int, gridWidth: float, gridColor: Color, backgroundColor: Color):
@@ -78,9 +80,21 @@ class ReversiBoard:
     def __init__(self, surface: Surface, boardInfo: ReversiBoardInfo):
         self.surface = surface
         self.boardInfo = boardInfo
+        self.__renderGroup = RenderUpdates()
 
         # make a 2d array of numGridX * numGridY 
         self.__grids = [[ReversiGrid() for i in range(0, boardInfo.gridSizeX)] for j in range(0, boardInfo.gridSizeY)]
+        
+        # initialize sprites
+        self.__sprites = [[FlippingReversiStone(stoneType=StoneType.BlackStone, imageScale=Vector2(boardInfo.gridWidth * 0.8)) for i in range(0, boardInfo.gridSizeX)] for j in range(0, boardInfo.gridSizeY)]
+        for x in range(0, self.boardInfo.gridSizeX):
+            for y in range(0, self.boardInfo.gridSizeY):
+                sprite = self.__sprites[x][y]
+                spriteSize = Vector2(self.__sprites[x][y].image.get_width() / 2, self.__sprites[x][y].image.get_height() / 2) 
+                newLocation = Vector2(self.getPositionFromGridIndex(x, y)) - spriteSize
+                sprite.moveTo(newLocation)
+
+                sprite.loopAnimation = False
 
     def getGridsAsStr(self):
         message = "[\n"
@@ -89,7 +103,7 @@ class ReversiBoard:
             for x in range(0, self.boardInfo.gridSizeX):
                 grid = self.getGrid(x, y)
                 # gridNum = 0 if grid.isEmpty else (1 if grid.stoneType == StoneType.BlackStone else 2)
-                gridNum = reversiUtility.convertGridToInt(grid)
+                gridNum = grid.ToInt()
                 message += str(gridNum) if x == 0 else ", " + str(gridNum)
             message += "],\n"
         message += "]"
@@ -110,6 +124,7 @@ class ReversiBoard:
     def setGrid(self, indexX: int, indexY: int, newGrid: ReversiGrid, playAnimation: bool = True):
         lastGrid = self.__grids[indexX][indexY]
         self.__grids[indexX][indexY] = newGrid
+        self.__sprites[indexX][indexY].setStoneType(newGrid.stoneType, playAnimation)
 
         if playAnimation:
             if lastGrid.isEmpty and not newGrid.isEmpty:
@@ -118,6 +133,9 @@ class ReversiBoard:
             elif not lastGrid.isEmpty and not newGrid.isEmpty and lastGrid.stoneType != newGrid.stoneType:
                 # todo play animation for flip
                 pass
+
+    def getSprite(self, indexX: int, indexY: int):
+        return self.__sprites[indexX][indexY]
 
     def isOverReversiBoard(self, coordinate: Vector2):
         return self.boardInfo.boardOffset.x <= coordinate.x and coordinate.x <= self.boardInfo.boardOffset.x + self.boardInfo.gridWidth * self.boardInfo.gridSizeX and self.boardInfo.boardOffset.y <= coordinate.y and coordinate.y <= self.boardInfo.boardOffset.y + self.boardInfo.gridWidth * self.boardInfo.gridSizeY
@@ -136,7 +154,19 @@ class ReversiBoard:
         self.surface.fill(self.boardInfo.backgroundColor)
 
         self.drawGrids()
-        self.drawStones()
+        # self.drawStones()
+
+        self.__renderGroup.empty()
+        for x in range(0, self.boardInfo.gridSizeX):
+            for y in range(0, self.boardInfo.gridSizeY):
+                if self.containGrid(x, y):
+                    grid = self.getGrid(x, y)
+                    sprite = self.getSprite(x, y)
+                    if not grid.isEmpty:
+                        self.__renderGroup.add(self.__sprites[x][y])
+
+        self.__renderGroup.update()
+        self.__renderGroup.draw(self.surface)
 
     def drawGrids(self):
         # print("drawing grids: boardOffset=%s, gridWidth=%.1f" % (self.boardInfo.boardOffset, self.boardInfo.gridWidth))
@@ -170,15 +200,16 @@ class ReversiBoard:
                 # print("lineStart=%s, lineEnd=%s" % (lineStart, lineEnd))
                 pygame.draw.line(self.surface, self.boardInfo.gridColor, lineStart, lineEnd, 1)
     
-    def drawStones(self):
-        for x in range(0, self.boardInfo.gridSizeX):
-            for y in range(0, self.boardInfo.gridSizeY):
-                if self.containGrid(x, y):
-                    grid = self.getGrid(x, y)
-                    if not grid.isEmpty:
-                        StoneColor = (0 ,0, 0) if grid.stoneType == StoneType.BlackStone else (255, 255, 255)
-                        radius = self.boardInfo.gridWidth / 2.0 * 0.8
-                        pygame.draw.circle(self.surface, StoneColor, self.getPositionFromGridIndex(x, y), radius)
+    # draw stones without using images
+    # def drawStones(self):
+    #     for x in range(0, self.boardInfo.gridSizeX):
+    #         for y in range(0, self.boardInfo.gridSizeY):
+    #             if self.containGrid(x, y):
+    #                 grid = self.getGrid(x, y)
+    #                 if not grid.isEmpty:
+    #                     StoneColor = (0 ,0, 0) if grid.stoneType == StoneType.BlackStone else (255, 255, 255)
+    #                     radius = self.boardInfo.gridWidth / 2.0 * 0.8
+    #                     pygame.draw.circle(self.surface, StoneColor, self.getPositionFromGridIndex(x, y), radius)
 
     def canFlipStonesAt(self, indexX: int, indexY: int, stoneType: StoneType):
         return self.getFlipInfo(indexX, indexY, stoneType).getNumEndPoints() > 0

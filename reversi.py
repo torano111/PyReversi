@@ -4,7 +4,7 @@ import pygame
 from pygame.math import Vector2
 from gameManager import GameManager, GameState, PlayerActionType
 from reversiBoard import ReversiBoardInfo, ReversiBoard
-from reversiGrid import ReversiGrid, StoneType
+from reversiStoneType import StoneType
 from player import Player
 import reversiGridsList
 import settings
@@ -17,8 +17,8 @@ def main():
     pygame.display.set_caption("Reversi")
     clock = pygame.time.Clock()
     
-    player0 = Player(StoneType.BlackStone)
-    player1 = Player(StoneType.WhiteStone)
+    player0 = Player(StoneType.WhiteStone)
+    player1 = Player(StoneType.BlackStone)
 
     boardSizeOffset = 1 # offset for grids
     boardSurface = pygame.Surface((settings.GRID_WIDTH * settings.GRID_SIZE_X + boardSizeOffset, settings.GRID_WIDTH * settings.GRID_SIZE_Y + boardSizeOffset))

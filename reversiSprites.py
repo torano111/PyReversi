@@ -1,7 +1,7 @@
 import pygame
 from pygame.sprite import Sprite
 from pygame import Vector2
-from reversiGrid import StoneType
+from reversiStoneType import StoneType
 import settings
 import reversiUtility
 
@@ -85,4 +85,8 @@ class FlippingReversiStone(ReversiStone):
             self.lastStoneType = self.stoneType
             self.stoneType = stoneType
             if animate:
+                self.reverseAnimation = False if self.lastStoneType == StoneType.WhiteStone else True
                 self.startAnimate()
+            elif len(self._images) > 0:
+                idx = 0 if stoneType == StoneType.WhiteStone else len(self._images) - 1
+                self.setCurrentImage(idx)
