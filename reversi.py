@@ -2,11 +2,10 @@ import sys
 from turtle import width
 import pygame
 from pygame.math import Vector2
-from gameManager import GameManager, GameState, PlayerActionType
+from gameManager import GameManager, GameState
 from reversiBoard import ReversiBoardInfo, ReversiBoard
 from reversiStoneType import StoneType
 from player import Player
-import reversiGridsList
 import settings
 
 # does initialization and operates game tick.
@@ -17,8 +16,9 @@ def main():
     pygame.display.set_caption("Reversi")
     clock = pygame.time.Clock()
     
-    player0 = Player(StoneType.WhiteStone)
-    player1 = Player(StoneType.BlackStone)
+    IconSize = (settings.PLAYER_FONT_SIZE / 2.0, settings.PLAYER_FONT_SIZE / 2.0)
+    player0 = Player(StoneType.WhiteStone, settings.PLAYER_NAME_0, settings.PLAYER_FONT_COLOR_0, settings.PLAYER_ICON_FILEPATH_0, IconSize)
+    player1 = Player(StoneType.BlackStone, settings.PLAYER_NAME_1, settings.PLAYER_FONT_COLOR_1, settings.PLAYER_ICON_FILEPATH_1, IconSize)
 
     boardSizeOffset = 1 # offset for grids
     boardSurface = pygame.Surface((settings.GRID_WIDTH * settings.GRID_SIZE_X + boardSizeOffset, settings.GRID_WIDTH * settings.GRID_SIZE_Y + boardSizeOffset))

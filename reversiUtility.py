@@ -1,4 +1,3 @@
-from reversiStoneType import StoneType
 import pygame
 
 def loadImage(filename):

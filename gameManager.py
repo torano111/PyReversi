@@ -5,8 +5,8 @@ import pygame
 from pygame.math import Vector2
 from reversiGrid import ReversiGrid
 from pygame import Surface
-
 from reversiStoneType import StoneType
+import settings
 
 DEBUG_KEY = pygame.K_F1
 DEBUG_NO_TURN_CHANGE = False
@@ -97,9 +97,11 @@ class GameManager:
         if self.__gameState == GameState.WaitingForGame:
             self.handleFlipAnimation()
 
-        self.mainSurface.fill((220, 220, 220))
+        self.mainSurface.fill(settings.SCREEN_COLOR)
         self.board.update()
         self.mainSurface.blit(self.board.surface, self.boardOffset)
+
+        self.showCurrentPlayerNameAndIcon()
 
     def handlePlayerAction(self, action: PlayerActionType):
         player = self.getCurrentPlayer()
@@ -162,3 +164,17 @@ class GameManager:
             if DEBUG_NO_TURN_CHANGE: return
             
             self.__changePlayerTurn()
+
+    def showCurrentPlayerNameAndIcon(self):
+        curPlayer = self.getCurrentPlayer()
+
+        # Icon
+        self.mainSurface.blit(curPlayer.icon, settings.PLAYER_ICON_COORDINATE)
+        
+        # Font
+        fontColor = curPlayer.fontColor
+        font = pygame.font.Font(None, settings.PLAYER_FONT_SIZE)
+        text = curPlayer.name
+        size = font.size(text)
+        textSurface = font.render(text, 1, fontColor)
+        self.mainSurface.blit(textSurface, settings.PLAYER_FONT_COORDINATE)

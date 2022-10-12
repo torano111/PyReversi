@@ -5,10 +5,10 @@ import reversiGridsList
 FRAME_RATE = 60.0
 SEC_PER_FRAME = 1.0 / FRAME_RATE
 SCREENRECT = pygame.Rect(0, 0, 600, 600)
+SCREEN_COLOR = pygame.Color(99, 63, 32)
 
 # Board
 BOARD_START_POS = pygame.Vector2(10, 10)
-# BOARD_COLOR = pygame.Color(220, 220, 220)
 BOARD_COLOR = pygame.Color(0, 255, 0)
 INITIAL_GRIDS = reversiGridsList.reversiGrids
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids1
@@ -36,3 +36,18 @@ FILES_FLIPPING_REVERSI = [
     "flippingReversi009.png",
     "flippingReversi010.png",
 ]
+
+# Player Font
+PLAYER_FONT_SIZE = 100
+PLAYER_FONT_COORDINATE = (50, 500)
+PLAYER_ICON_COORDINATE = (0, 500)
+
+# Player 0
+PLAYER_NAME_0 = "Player0"
+PLAYER_ICON_FILEPATH_0 = "images\\flippingReversi\\flippingReversi000.png"
+PLAYER_FONT_COLOR_0 = (255, 255, 255)
+
+# Player 1
+PLAYER_NAME_1 = "Player1"
+PLAYER_ICON_FILEPATH_1 = "images\\flippingReversi\\flippingReversi010.png"
+PLAYER_FONT_COLOR_1 = (0, 0, 0)
