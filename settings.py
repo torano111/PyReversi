@@ -1,6 +1,10 @@
 import pygame
 import reversiGridsList
 
+# Debugging
+DEBUG_KEY = pygame.K_F1
+DEBUG_NO_TURN_CHANGE = False
+
 # Game in general
 FRAME_RATE = 60.0
 SEC_PER_FRAME = 1.0 / FRAME_RATE

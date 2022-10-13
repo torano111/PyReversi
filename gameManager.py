@@ -8,9 +8,6 @@ from pygame import Surface
 from reversiStoneType import StoneType
 import settings
 
-DEBUG_KEY = pygame.K_F1
-DEBUG_NO_TURN_CHANGE = False
-
 class PlayerActionType(IntEnum):
     Nothing = 0,
     PutStone = 1,
@@ -83,7 +80,7 @@ class GameManager:
     def update(self):
         for event in pygame.event.get():
             # debug game
-            if event.type == pygame.KEYDOWN and event.key == DEBUG_KEY:
+            if event.type == pygame.KEYDOWN and event.key == settings.DEBUG_KEY:
                 print("Debug Reversi:\n")
                 print(self.board)
 
@@ -163,7 +160,7 @@ class GameManager:
         self.__gameState = GameState.WaitingForPlayer
 
         # change the player turn
-        if not DEBUG_NO_TURN_CHANGE and self.canPlayerPutStone(self.getOtherPlayer()):
+        if not settings.DEBUG_NO_TURN_CHANGE and self.canPlayerPutStone(self.getOtherPlayer()):
             self.__changePlayerTurn()
         else:
             print("Player %d turn still continues. player %d turn was skipped!" % (self.__curPlayerIdx, self.getOtherPlayerIndex(self.__curPlayerIdx)))
