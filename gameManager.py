@@ -54,7 +54,8 @@ class GameManager:
     def StartGame(self, startPlayerIdx: int = 0, initialGrids = []):
         if self.__gameState == GameState.Initializing:
             self.__curPlayerIdx = startPlayerIdx
-            sizeX, sizeY = self.board.getGridSize(); 
+            # x and y inversed
+            sizeY, sizeX = self.board.getGridSize(); 
 
             # check initGrids
             isValidArray = True
@@ -71,7 +72,8 @@ class GameManager:
                 for x in range(0, sizeX):
                     for y in range(0, sizeY):
                         grid = ReversiGrid.ToGrid(initialGrids[x][y])
-                        self.board.setGrid(x, y, grid, False)
+                        # x and y inversed
+                        self.board.setGrid(y, x, grid, False)
 
             self.__gameState = GameState.WaitingForPlayer
             self.board.update()
