@@ -39,12 +39,18 @@ class GameManager:
     def getCurrentPlayer(self):
         return self.getPlayer(self.__curPlayerIdx)
 
+    def getOtherPlayer(self):
+        return self.getPlayer(self.getOtherPlayerIndex(self.__curPlayerIdx))
+
     def getGameState(self):
         return self.__gameState
 
+    def getOtherPlayerIndex(self, idx):
+        return 0 if len(self.__players) <= idx + 1 else idx + 1
+
     def __changePlayerTurn(self):
         lastPlayerIdx = self.__curPlayerIdx
-        self.__curPlayerIdx = 0 if len(self.__players) <= self.__curPlayerIdx + 1 else self.__curPlayerIdx + 1
+        self.__curPlayerIdx = self.getOtherPlayerIndex(self.__curPlayerIdx)
 
         print("changed player turn %d -> %d %s" % (lastPlayerIdx, self.__curPlayerIdx, self.getCurrentPlayer()))
 
@@ -88,12 +94,8 @@ class GameManager:
             # check player input
             elif self.__gameState == GameState.WaitingForPlayer:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # left mouse button
-                    # self.__gameState = GameState.WaitingForGame
                     self.handlePlayerAction(PlayerActionType.PutStone)
 
-                    # todo comment out this and do animation.
-                    # self.__gameState = GameState.WaitingForPlayer
-        
         if self.__gameState == GameState.WaitingForGame:
             self.handleFlipAnimation()
 
@@ -116,14 +118,13 @@ class GameManager:
                     if lastGrid.isEmpty:
                         flipInfo = self.board.getFlipInfo(mouseIndexX, mouseIndexY, player.stoneType)
                         if flipInfo.getNumEndPoints() <= 0:
-                            print("Couldn't put stone at (%d, %d) because no stone can be flipped.")
+                            print("Couldn't put stone at (%d, %d) because no stone can be flipped." % (mouseIndexX, mouseIndexY))
                             return
                         
                         # place a stone
                         self.board.setGrid(mouseIndexX, mouseIndexY, newGrid, False)
                         self.flipStoneType = newGrid.stoneType
                         self.flippingStoneInfos.clear()
-                        # self.flippingStoneInfos.append((mouseIndexX, mouseIndexY))
                         print("Player %d put a stone(%s) at (%d, %d)" % (self.__curPlayerIdx, newGrid.stoneType, mouseIndexX, mouseIndexY))
 
                         # flip stones
@@ -136,8 +137,6 @@ class GameManager:
                                     # self.board.setGrid(inrPts[0], inrPts[1], gridToFlip, True)
                                     self.flippingStoneInfos.append(inrPts)
 
-                        # todo check if the other player can put a stone before changing the turn. if not, skip his turn.
-                        # if not DEBUG_NO_TURN_CHANGE: self.__changePlayerTurn()
                         print("") # space
                         self.__gameState = GameState.WaitingForGame
 
@@ -157,13 +156,18 @@ class GameManager:
             else:
                 print("error: reversi board doesn't contain (%d, %d)" % (flipInfo[0], flipInfo[1]))
 
-        # change the player turn
         if len(self.flippingStoneInfos) == 0:
-            self.__gameState = GameState.WaitingForPlayer
+            self.onEndPlayerTurn()
 
-            if DEBUG_NO_TURN_CHANGE: return
-            
+    def onEndPlayerTurn(self):
+        self.__gameState = GameState.WaitingForPlayer
+
+        # change the player turn
+        if not DEBUG_NO_TURN_CHANGE and self.canPlayerPutStone(self.getOtherPlayer()):
             self.__changePlayerTurn()
+        else:
+            print("Player %d turn still continues. player %d turn was skipped!" % (self.__curPlayerIdx, self.getOtherPlayerIndex(self.__curPlayerIdx)))
+
 
     def showCurrentPlayerNameAndIcon(self):
         curPlayer = self.getCurrentPlayer()
@@ -178,3 +182,18 @@ class GameManager:
         size = font.size(text)
         textSurface = font.render(text, 1, fontColor)
         self.mainSurface.blit(textSurface, settings.PLAYER_FONT_COORDINATE)
+
+    def canPlayerPutStone(self, player: Player):
+        gridSizeX, gridSizeY = self.board.getGridSize()
+        for x in range(gridSizeX):
+            for y in range(gridSizeY):
+                grid = self.board.getGrid(x, y)
+                if not grid.isEmpty: continue
+                
+                flipInfo = self.board.getFlipInfo(x, y, player.stoneType)
+                if flipInfo.getNumEndPoints() > 0:
+                # if self.board.canFlipStonesAt(x, y, player.stoneType):
+                    print("Player can put stone at (%d, %d)!" % (x, y))
+                    return True
+
+        return False

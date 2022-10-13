@@ -13,6 +13,8 @@ BOARD_COLOR = pygame.Color(0, 255, 0)
 INITIAL_GRIDS = reversiGridsList.reversiGrids
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids1
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids2
+# INITIAL_GRIDS = reversiGridsList.testFlipGrids3
+# INITIAL_GRIDS = reversiGridsList.testFlipGrids4
 
 # Grids
 GRID_SIZE_X = 8
