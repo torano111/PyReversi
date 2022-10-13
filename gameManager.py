@@ -78,6 +78,9 @@ class GameManager:
             self.__gameState = GameState.WaitingForPlayer
             self.board.update()
 
+            if settings.DEBUG_SHOW_GRIDS_EVERY_TURN:
+                print(self.board)
+
     # should be called every tick
     def update(self):
         for event in pygame.event.get():
@@ -163,6 +166,9 @@ class GameManager:
 
         # change the player turn
         if not settings.DEBUG_NO_TURN_CHANGE and self.canPlayerPutStone(self.getOtherPlayer()):
+            if settings.DEBUG_SHOW_GRIDS_EVERY_TURN:
+                print(self.board)
+                
             self.__changePlayerTurn()
         else:
             print("Player %d turn still continues. player %d turn was skipped!" % (self.__curPlayerIdx, self.getOtherPlayerIndex(self.__curPlayerIdx)))

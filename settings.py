@@ -4,6 +4,7 @@ import reversiGridsList
 # Debugging
 DEBUG_KEY = pygame.K_F1
 DEBUG_NO_TURN_CHANGE = False
+DEBUG_SHOW_GRIDS_EVERY_TURN = True
 
 # Game in general
 FRAME_RATE = 60.0
