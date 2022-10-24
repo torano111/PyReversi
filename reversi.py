@@ -30,8 +30,8 @@ def main():
     gm.StartGame(0, settings.INITIAL_GRIDS)
 
     while gm.getGameState() != GameState.EndingGame: 
-        clock.tick(settings.FRAME_RATE)
-        gm.update()
+        deltaTime = clock.tick(settings.FRAME_RATE) / 1000.0
+        gm.update(deltaTime)
         pygame.display.update()
         
     pygame.quit()

@@ -251,3 +251,19 @@ class ReversiBoard:
                     flipInfo.appendEndPoint(*endPoint)
 
         return flipInfo
+
+    def getNumEmpty(self):
+        num = 0
+        for y in range(0, self.boardInfo.gridSizeY):
+            for x in range(0, self.boardInfo.gridSizeX):
+                grid = self.getGrid(x, y)
+                if grid.isEmpty: num += 1
+        return num
+
+    def getNumStones(self, testStoneType: StoneType):
+        num = 0
+        for y in range(0, self.boardInfo.gridSizeY):
+            for x in range(0, self.boardInfo.gridSizeX):
+                grid = self.getGrid(x, y)
+                if grid.stoneType == testStoneType: num += 1
+        return num

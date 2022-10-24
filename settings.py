@@ -1,5 +1,6 @@
 import pygame
 import reversiGridsList
+from pygame.math import Vector2
 
 # Debugging
 DEBUG_KEY = pygame.K_F1
@@ -20,6 +21,9 @@ INITIAL_GRIDS = reversiGridsList.reversiGrids
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids2
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids3
 # INITIAL_GRIDS = reversiGridsList.testFlipGrids4
+# INITIAL_GRIDS = reversiGridsList.testFlipGrids5
+# INITIAL_GRIDS = reversiGridsList.testFlipGrids6
+INITIAL_GRIDS = reversiGridsList.testFlipGrids7
 
 # Grids
 GRID_SIZE_X = 8
@@ -58,3 +62,9 @@ PLAYER_FONT_COLOR_0 = (255, 255, 255)
 PLAYER_NAME_1 = "Player1"
 PLAYER_ICON_FILEPATH_1 = "images\\flippingReversi\\flippingReversi010.png"
 PLAYER_FONT_COLOR_1 = (0, 0, 0)
+
+# Game result font
+RESULT_FONT_SIZE = 20
+RESULT_FONT_COORDINATE = Vector2(450, 50)
+RESULT_FONT_COORDINATE_OFFSET = Vector2(0, 50)
+RESULT_FONT_COLOR = (0, 0, 0)

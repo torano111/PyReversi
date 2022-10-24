@@ -16,7 +16,21 @@ class GameState(IntEnum):
     Initializing = 1,
     WaitingForPlayer = 2,
     WaitingForGame = 3,
-    EndingGame = 4,
+    ShowResult = 4
+    EndingGame = 5,
+
+class GameResult:
+    def __init__(self, showPlayer0ResultDelay = 1.0, showPlayer1ResultDelay = 1.0, showWinnerDelay = 1.0):
+        self.showPlayer0Result = False
+        self.showPlayer0ResultDelay = showPlayer0ResultDelay
+        self.showPlayer1Result = False
+        self.showPlayer1ResultDelay = showPlayer1ResultDelay
+        self.showWinner = False
+        self.showWinnerDelay = showWinnerDelay
+        self.timeElapsed = 0.0
+        self.player0Score = 0
+        self.player1Score = 0
+        self.winner = -1
 
 # Handles Reversi game logic
 class GameManager:
@@ -29,6 +43,7 @@ class GameManager:
         self.boardOffset = boardOffset
         self.flippingStoneInfos = []
         self.flipStoneType = StoneType.BlackStone
+        self.__gameResult = GameResult(1, 1, 1)
 
     def getPlayer(self, index: int):
         return self.__players[index]
@@ -82,7 +97,7 @@ class GameManager:
                 print(self.board)
 
     # should be called every tick
-    def update(self):
+    def update(self, deltaTime):
         for event in pygame.event.get():
             # debug game
             if event.type == pygame.KEYDOWN and event.key == settings.DEBUG_KEY:
@@ -103,6 +118,10 @@ class GameManager:
 
         self.mainSurface.fill(settings.SCREEN_COLOR)
         self.board.update()
+
+        if self.__gameState == GameState.ShowResult:
+            self.showResult(deltaTime)
+
         self.mainSurface.blit(self.board.surface, self.boardOffset)
 
         self.showCurrentPlayerNameAndIcon()
@@ -170,6 +189,8 @@ class GameManager:
                 print(self.board)
                 
             self.__changePlayerTurn()
+        elif not self.canPlayerPutStone(self.getCurrentPlayer()):
+            self.__gameState = GameState.ShowResult
         else:
             print("Player %d turn still continues. player %d turn was skipped!" % (self.__curPlayerIdx, self.getOtherPlayerIndex(self.__curPlayerIdx)))
 
@@ -202,3 +223,63 @@ class GameManager:
                     return True
 
         return False
+
+    def showResult(self, deltaTime):
+        # print("finished game! showing the result.")
+
+        # player 0 result
+        if self.__gameResult.showPlayer0Result:
+            curPlayer = self.getPlayer(0)
+            font = pygame.font.Font(None, settings.RESULT_FONT_SIZE)
+            text = curPlayer.name + ": " + str(self.__gameResult.player0Score)
+            textSurface = font.render(text, 1, settings.RESULT_FONT_COLOR)
+            self.mainSurface.blit(textSurface, settings.RESULT_FONT_COORDINATE)
+        elif self.__gameResult.timeElapsed >= self.__gameResult.showPlayer0ResultDelay:
+            self.__gameResult.showPlayer0Result = True
+            self.__gameResult.timeElapsed = 0.0
+
+            self.__gameResult.player0Score = self.board.getNumStones(self.__players[0].stoneType)
+            print("Player 0 score: %d" % (self.__gameResult.player0Score))
+            return
+
+        # player 1 result
+        if self.__gameResult.showPlayer1Result:
+            curPlayer = self.getPlayer(1)
+            font = pygame.font.Font(None, settings.RESULT_FONT_SIZE)
+            text = curPlayer.name + ": " + str(self.__gameResult.player1Score)
+            textSurface = font.render(text, 1, settings.RESULT_FONT_COLOR)
+            self.mainSurface.blit(textSurface, settings.RESULT_FONT_COORDINATE + settings.RESULT_FONT_COORDINATE_OFFSET)
+        elif self.__gameResult.timeElapsed >= self.__gameResult.showPlayer1ResultDelay:
+            self.__gameResult.showPlayer1Result = True
+            self.__gameResult.timeElapsed = 0.0
+
+            self.__gameResult.player1Score = self.board.getNumStones(self.__players[1].stoneType)
+            print("Player 1 score: %d" % (self.__gameResult.player1Score))
+            return
+
+        # winner
+        if self.__gameResult.showWinner:
+            curPlayer = self.getPlayer(1)
+            font = pygame.font.Font(None, settings.RESULT_FONT_SIZE)
+            prefix = "Result: "
+            if self.__gameResult.winner == 0 or self.__gameResult.winner == 1:
+                text = prefix + self.getPlayer(self.__gameResult.winner).name
+            else:
+                text = prefix + "Draw"
+            textSurface = font.render(text, 1, settings.RESULT_FONT_COLOR)
+            self.mainSurface.blit(textSurface, settings.RESULT_FONT_COORDINATE + settings.RESULT_FONT_COORDINATE_OFFSET * 2)
+        elif self.__gameResult.timeElapsed >= self.__gameResult.showWinnerDelay:
+            self.__gameResult.showWinner = True
+            self.__gameResult.timeElapsed = 0.0
+
+            if self.__gameResult.player0Score == self.__gameResult.player1Score:
+                self.__gameResult.winner = -1   # draw
+            elif self.__gameResult.player0Score > self.__gameResult.player1Score:
+                self.__gameResult.winner = 0
+            else: #self.__gameResult.player0Score < self.__gameResult.player1Score: self.__gameResult.winner 
+                self.__gameResult.winner = 1
+            
+            print("Winner: %d" % (self.__gameResult.winner))
+            return
+
+        self.__gameResult.timeElapsed += deltaTime
