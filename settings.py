@@ -34,7 +34,7 @@ GRID_COLOR = pygame.Color(0, 0, 0)
 
 # flipping reversi
 DIRECTORY_FLIPPING_REVERSI = "images\\flippingReversi\\"
-ANIM_DURATION_FLIPPING_REVERSI = 1.0
+ANIM_DURATION_FLIPPING_REVERSI = 0.5
 FILES_FLIPPING_REVERSI = [
     "flippingReversi000.png",
     "flippingReversi001.png",
