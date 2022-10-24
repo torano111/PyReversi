@@ -294,11 +294,10 @@ class GameManager:
         if self.__gameResult.showWinner:
             curPlayer = self.getPlayer(1)
             font = pygame.font.Font(None, settings.RESULT_FONT_SIZE)
-            prefix = "Result: "
             if self.__gameResult.winner == 0 or self.__gameResult.winner == 1:
-                text = prefix + self.getPlayer(self.__gameResult.winner).name
+                text = self.getPlayer(self.__gameResult.winner).name + " won!"
             else:
-                text = prefix + "Draw"
+                text = "Draw"
             textSurface = font.render(text, 1, settings.RESULT_FONT_COLOR)
             self.mainSurface.blit(textSurface, settings.RESULT_FONT_COORDINATE + settings.RESULT_FONT_COORDINATE_OFFSET * 2)
         elif self.__gameResult.timeElapsed >= self.__gameResult.showWinnerDelay:
