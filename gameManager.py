@@ -1,4 +1,4 @@
-from reversiBoard import ReversiBoard, FlipInfo
+from reversiBoard import ReversiBoard, FlipInfo, ReversiBoardInfo
 from enum import IntEnum
 from player import Player
 import pygame
@@ -11,6 +11,7 @@ import settings
 class PlayerActionType(IntEnum):
     Nothing = 0,
     PutStone = 1,
+    ResetGame = 2,
 
 class GameState(IntEnum):
     Initializing = 1,
@@ -34,13 +35,27 @@ class GameResult:
 
 # Handles Reversi game logic
 class GameManager:
-    def __init__(self, surface: Surface, board: ReversiBoard, firstPlayer: Player, secondPlayer: Player, boardOffset: Vector2):
+    def __init__(self, surface: Surface):
         self.mainSurface = surface
+        self.initGame()
+        
+    def initGame(self):
+        IconSize = (settings.PLAYER_FONT_SIZE / 2.0, settings.PLAYER_FONT_SIZE / 2.0)
+        player0 = Player(StoneType.WhiteStone, settings.PLAYER_NAME_0, settings.PLAYER_FONT_COLOR_0, settings.PLAYER_ICON_FILEPATH_0, IconSize)
+        player1 = Player(StoneType.BlackStone, settings.PLAYER_NAME_1, settings.PLAYER_FONT_COLOR_1, settings.PLAYER_ICON_FILEPATH_1, IconSize)
+        self.__players = [player0, player1]
+
+        boardSizeOffset = 1 # offset for grids
+        boardSurface = pygame.Surface((settings.GRID_WIDTH * settings.GRID_SIZE_X + boardSizeOffset, settings.GRID_WIDTH * settings.GRID_SIZE_Y + boardSizeOffset))
+        boardSurface.convert()
+
+        boardInfo = ReversiBoardInfo(Vector2(), settings.GRID_SIZE_X, settings.GRID_SIZE_Y, settings.GRID_WIDTH, settings.GRID_COLOR, settings.BOARD_COLOR)
+        board = ReversiBoard(boardSurface, boardInfo)
         self.board = board
-        self.__players = [firstPlayer, secondPlayer]
+        
         self.__gameState = GameState.Initializing
         self.__curPlayerIdx = 0 
-        self.boardOffset = boardOffset
+        self.boardOffset = settings.BOARD_START_POS
         self.flippingStoneInfos = []
         self.flipStoneType = StoneType.BlackStone
         self.__gameResult = GameResult(1, 1, 1)
@@ -66,7 +81,10 @@ class GameManager:
 
         print("changed player turn %d -> %d %s" % (lastPlayerIdx, self.__curPlayerIdx, self.getCurrentPlayer()))
 
-    def StartGame(self, startPlayerIdx: int = 0, initialGrids = []):
+    def startGame(self):
+        startPlayerIdx = settings.INITIAL_PLAYER_INDEX
+        initialGrids = settings.INITIAL_GRIDS
+
         if self.__gameState == GameState.Initializing:
             self.__curPlayerIdx = startPlayerIdx
             # x and y inversed
@@ -104,14 +122,23 @@ class GameManager:
                 print("Debug Reversi:\n")
                 print(self.board)
 
-            # finish game
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT:
                 self.__gameState = GameState.EndingGame
                 return
+
             # check player input
-            elif self.__gameState == GameState.WaitingForPlayer:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # left mouse button
-                    self.handlePlayerAction(PlayerActionType.PutStone)
+            match event.type:
+                case pygame.MOUSEBUTTONDOWN:
+                    match event.button:
+                        case 1: # left mouse button
+                            if self.__gameState == GameState.WaitingForPlayer:
+                                self.handlePlayerAction(PlayerActionType.PutStone)
+                case pygame.KEYDOWN:
+                    match event.key:
+                        case pygame.K_ESCAPE:
+                            self.__gameState = GameState.EndingGame
+                        case pygame.K_r:
+                            self.resetGame()
 
         if self.__gameState == GameState.WaitingForGame:
             self.handleFlipAnimation()
@@ -122,6 +149,8 @@ class GameManager:
         if self.__gameState == GameState.ShowResult:
             self.showResult(deltaTime)
 
+        self.showGameInfo()
+
         self.mainSurface.blit(self.board.surface, self.boardOffset)
 
         self.showCurrentPlayerNameAndIcon()
@@ -129,9 +158,10 @@ class GameManager:
     def handlePlayerAction(self, action: PlayerActionType):
         player = self.getCurrentPlayer()
 
-        if action == PlayerActionType.PutStone:
-            mousePos = pygame.mouse.get_pos()
-            if self.board.isOverReversiBoard(Vector2(mousePos) - self.boardOffset):
+        match action:
+            case PlayerActionType.PutStone:
+                mousePos = pygame.mouse.get_pos()
+                if self.board.isOverReversiBoard(Vector2(mousePos) - self.boardOffset):
                     mouseIndexX, mouseIndexY = self.board.getGridIndex(Vector2(mousePos) - self.boardOffset)
                     lastGrid = self.board.getGrid(mouseIndexX, mouseIndexY)
                     newGrid = ReversiGrid(False, player.stoneType)
@@ -160,6 +190,9 @@ class GameManager:
 
                         print("") # space
                         self.__gameState = GameState.WaitingForGame
+            case ResetGame:
+                pass
+                #todo
 
     def handleFlipAnimation(self):
         if len(self.flippingStoneInfos) > 0:
@@ -283,3 +316,15 @@ class GameManager:
             return
 
         self.__gameResult.timeElapsed += deltaTime
+
+    def resetGame(self):
+        print("reset game")
+        self.initGame()
+        self.startGame()
+
+    def showGameInfo(self):
+        curPlayer = self.getPlayer(1)
+        resetGameFont = pygame.font.Font(None, settings.GAME_INFO_FONT_SIZE)
+        resetGameText = "Reset: R"
+        textSurface = resetGameFont.render(resetGameText, 1, settings.GAME_INFO_FONT_COLOR)
+        self.mainSurface.blit(textSurface, settings.GAME_INFO_FONT_COORDINATE)

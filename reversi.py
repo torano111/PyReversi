@@ -16,18 +16,8 @@ def main():
     pygame.display.set_caption("Reversi")
     clock = pygame.time.Clock()
     
-    IconSize = (settings.PLAYER_FONT_SIZE / 2.0, settings.PLAYER_FONT_SIZE / 2.0)
-    player0 = Player(StoneType.WhiteStone, settings.PLAYER_NAME_0, settings.PLAYER_FONT_COLOR_0, settings.PLAYER_ICON_FILEPATH_0, IconSize)
-    player1 = Player(StoneType.BlackStone, settings.PLAYER_NAME_1, settings.PLAYER_FONT_COLOR_1, settings.PLAYER_ICON_FILEPATH_1, IconSize)
-
-    boardSizeOffset = 1 # offset for grids
-    boardSurface = pygame.Surface((settings.GRID_WIDTH * settings.GRID_SIZE_X + boardSizeOffset, settings.GRID_WIDTH * settings.GRID_SIZE_Y + boardSizeOffset))
-    boardSurface.convert()
-
-    boardInfo = ReversiBoardInfo(Vector2(), settings.GRID_SIZE_X, settings.GRID_SIZE_Y, settings.GRID_WIDTH, settings.GRID_COLOR, settings.BOARD_COLOR)
-    board = ReversiBoard(boardSurface, boardInfo)
-    gm = GameManager(screen, board, player0, player1, settings.BOARD_START_POS)
-    gm.StartGame(0, settings.INITIAL_GRIDS)
+    gm = GameManager(screen)
+    gm.startGame()
 
     while gm.getGameState() != GameState.EndingGame: 
         deltaTime = clock.tick(settings.FRAME_RATE) / 1000.0
